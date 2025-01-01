@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+/// Counter Provider
+class CounterProvider with ChangeNotifier {
+  int _counter = 0;
+
+  int get counter => _counter;
+
+  void increment() {
+    _counter++;
+    notifyListeners();
+  }
+}
+
+/// Color Provider
+class ColorProvider with ChangeNotifier {
+  Color _color = Colors.blue;
+
+  Color get color => _color;
+
+  void changeColor(Color newColor) {
+    _color = newColor;
+    notifyListeners();
+  }
+}
+
+/// Theme Provider
+class ThemeProvider with ChangeNotifier {
+  bool _isDarkMode = false;
+
+  bool get isDarkMode => _isDarkMode;
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
+
+  ThemeData get themeData =>
+      _isDarkMode ? ThemeData.dark() : ThemeData.light();
+}
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CounterProvider()),
+        ChangeNotifierProvider(create: (_) => ColorProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          theme: themeProvider.themeData,
+          home: HomeScreen(),
+        );
+      },
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Provider Best Practices'),
+        actions: [
+          // Toggle Theme Button
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                ),
+                onPressed: themeProvider.toggleTheme,
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Counter Display
+            Consumer<CounterProvider>(
+              builder: (context, counterProvider, child) {
+                return Text(
+                  'Counter: ${counterProvider.counter}',
+                  style: TextStyle(fontSize: 24),
+                );
+              },
+            ),
+            // Increment Button
+            Consumer<CounterProvider>(
+              builder: (context, counterProvider, child) {
+                return ElevatedButton(
+                  onPressed: counterProvider.increment,
+                  child: Text('Increment Counter'),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            // Color Change Button
+            Consumer<ColorProvider>(
+              builder: (context, colorProvider, child) {
+                return ElevatedButton(
+                  onPressed: () => colorProvider.changeColor(Colors.red),
+                  child: Text('Change Color to Red'),
+                  style: ElevatedButton.styleFrom(
+                    primary: colorProvider.color, // Button background color
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            // Color Preview Box
+            Consumer<ColorProvider>(
+              builder: (context, colorProvider, child) {
+                return Container(
+                  width: 100,
+                  height: 100,
+                  color: colorProvider.color,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
