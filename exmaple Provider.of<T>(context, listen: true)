@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class CounterProvider with ChangeNotifier {
+  int _counter = 0;
+
+  int get counter => _counter;
+
+  void increment() {
+    _counter++;
+    notifyListeners();
+  }
+}
+
+class ColorProvider with ChangeNotifier {
+  Color _color = Colors.blue;
+
+  Color get color => _color;
+
+  void changeColor(Color newColor) {
+    _color = newColor;
+    notifyListeners();
+  }
+}
+
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Using Provider.of<T>(context, listen: true) to listen to changes
+        Text(
+          'Counter: ${Provider.of<CounterProvider>(context).counter}',
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // Using Provider.of<T>(context, listen: false) to avoid listening
+            Provider.of<CounterProvider>(context, listen: false).increment();
+          },
+          child: Text('Increment Counter'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // Using Provider.of<T>(context, listen: false) for state modification
+            Provider.of<ColorProvider>(context, listen: false).changeColor(Colors.red);
+          },
+          child: Text('Change Color'),
+        ),
+        // Using Provider.of<T>(context, listen: true) to listen to changes
+        Container(
+          width: 100,
+          height: 100,
+          color: Provider.of<ColorProvider>(context).color,
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CounterProvider()),
+        ChangeNotifierProvider(create: (_) => ColorProvider()),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: Text('Provider.of Example')),
+          body: Center(child: MyWidget()),
+        ),
+      ),
+    ),
+  );
+}
