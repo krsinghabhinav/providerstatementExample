@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class CounterProvider with ChangeNotifier {
+  int _counter = 0;
+
+  int get counter => _counter;
+
+  void increment() {
+    _counter++;
+    notifyListeners();
+  }
+}
+
+class ColorProvider with ChangeNotifier {
+  Color _color = Colors.blue;
+
+  Color get color => _color;
+
+  void changeColor(Color newColor) {
+    _color = newColor;
+    notifyListeners();
+  }
+}
+
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Displaying the counter using Consumer
+        Consumer<CounterProvider>(
+          builder: (context, counterProvider, child) {
+            return Text('Counter: ${counterProvider.counter}');
+          },
+        ),
+        // Increment button using Consumer
+        Consumer<CounterProvider>(
+          builder: (context, counterProvider, child) {
+            return ElevatedButton(
+              onPressed: () {
+                counterProvider.increment();
+              },
+              child: Text('Increment Counter'),
+            );
+          },
+        ),
+        // Change color button using Consumer
+        Consumer<ColorProvider>(
+          builder: (context, colorProvider, child) {
+            return ElevatedButton(
+              onPressed: () {
+                colorProvider.changeColor(Colors.red);
+              },
+              child: Text('Change Color'),
+            );
+          },
+        ),
+        // Displaying a box with the current color using Consumer
+        Consumer<ColorProvider>(
+          builder: (context, colorProvider, child) {
+            return Container(
+              width: 100,
+              height: 100,
+              color: colorProvider.color,
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CounterProvider()),
+        ChangeNotifierProvider(create: (_) => ColorProvider()),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: Text('Consumer Example')),
+          body: Center(child: MyWidget()),
+        ),
+      ),
+    ),
+  );
+}
